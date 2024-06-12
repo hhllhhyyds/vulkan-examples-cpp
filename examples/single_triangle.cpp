@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "src/window.h"
-#include "src/instance.h"
+#include "window.h"
+#include "instance.h"
 
 class HelloTriangleApplication
 {
