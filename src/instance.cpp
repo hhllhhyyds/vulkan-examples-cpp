@@ -21,11 +21,11 @@ bool check_validation_layer_supported()
 
     for (const char *layer_name : VALIDATION_LAYERS)
     {
-        string layer(layer_name);
+        std::string layer(layer_name);
         bool layer_found = false;
         for (const auto &layer_properties : available_layers)
         {
-            string supported_layer(layer_properties.layerName);
+            std::string supported_layer(layer_properties.layerName);
             if (layer == supported_layer)
             {
                 layer_found = true;
@@ -40,21 +40,21 @@ bool check_validation_layer_supported()
     return true;
 }
 
-void check_required_extensions_supported(const vector<const char *> &required)
+void check_required_extensions_supported(const std::vector<const char *> &required)
 {
     uint32_t extension_count = 0;
     vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, nullptr);
 
-    vector<VkExtensionProperties> extensions(extension_count);
+    std::vector<VkExtensionProperties> extensions(extension_count);
     vkEnumerateInstanceExtensionProperties(nullptr, &extension_count, extensions.data());
 
     for (const auto ext : required)
     {
-        string required_ext(ext);
+        std::string required_ext(ext);
         bool ext_supported = false;
         for (const auto supported : extensions)
         {
-            string supported_ext(supported.extensionName);
+            std::string supported_ext(supported.extensionName);
             if (required_ext == supported_ext)
             {
                 ext_supported = true;
@@ -63,7 +63,7 @@ void check_required_extensions_supported(const vector<const char *> &required)
         }
         if (!ext_supported)
         {
-            string err = required_ext + " not suported.";
+            std::string err = required_ext + " not suported.";
             throw std::runtime_error(err);
         }
     }
@@ -96,7 +96,7 @@ Instance::Instance(const char *app_name)
     uint32_t glfw_extension_count = 0;
     const char **glfw_extensions;
     glfw_extensions = glfwGetRequiredInstanceExtensions(&glfw_extension_count);
-    vector<const char *> required_extensions;
+    std::vector<const char *> required_extensions;
     for (uint32_t i = 0; i < glfw_extension_count; i++)
     {
         required_extensions.emplace_back(glfw_extensions[i]);

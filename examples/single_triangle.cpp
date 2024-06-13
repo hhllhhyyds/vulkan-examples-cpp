@@ -23,6 +23,7 @@ public:
                                  surface(std::make_shared<Surface>(instance, window))
     {
         physical_device = std::make_shared<PhysicalDevice>(instance, surface);
+        device = std::make_shared<LogicalDevice>(physical_device);
     }
 
 private:
@@ -30,6 +31,7 @@ private:
     shared_ptr<Instance> instance;
     shared_ptr<Surface> surface;
     shared_ptr<PhysicalDevice> physical_device;
+    shared_ptr<LogicalDevice> device;
 
     void mainLoop()
     {

@@ -5,9 +5,6 @@
 
 #include "glfw_vulkan.h"
 
-using std::string;
-using std::vector;
-
 class Instance
 {
 public:

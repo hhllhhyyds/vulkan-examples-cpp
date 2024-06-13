@@ -1,5 +1,9 @@
 #include "device_queue.h"
 
+const std::vector<const char *> DEVICE_EXTENSIONS = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    "VK_KHR_portability_subset"};
+
 int device_priority(VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties device_properties;
@@ -31,12 +35,90 @@ int device_priority(VkPhysicalDevice device)
     return score;
 }
 
+bool device_extension_support(VkPhysicalDevice device)
+{
+    uint32_t extension_count;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, nullptr);
+
+    std::vector<VkExtensionProperties> available_extensions(extension_count);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extension_count, available_extensions.data());
+
+    for (const auto &required : DEVICE_EXTENSIONS)
+    {
+        std::string required_s(required);
+        bool found = false;
+        for (const auto &extension : available_extensions)
+        {
+            std::string extension_s(extension.extensionName);
+            if (required_s == extension_s)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+VkSurfaceCapabilitiesKHR get_surface_cap(VkPhysicalDevice device, VkSurfaceKHR surface)
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &capabilities);
+    return capabilities;
+}
+
+std::vector<VkSurfaceFormatKHR> get_surface_formats(VkPhysicalDevice device, VkSurfaceKHR surface)
+{
+    uint32_t format_count;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, nullptr);
+
+    std::vector<VkSurfaceFormatKHR> formats;
+    if (format_count != 0)
+    {
+        formats.resize(format_count);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &format_count, formats.data());
+    }
+
+    return formats;
+}
+
+std::vector<VkPresentModeKHR> get_surface_present_modes(VkPhysicalDevice device, VkSurfaceKHR surface)
+{
+    uint32_t mode_count;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &mode_count, nullptr);
+
+    std::vector<VkPresentModeKHR> modes;
+    if (mode_count != 0)
+    {
+        modes.resize(mode_count);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &mode_count, modes.data());
+    }
+
+    return modes;
+}
+
 int device_match_request(VkPhysicalDevice device, const shared_ptr<Surface> surface)
 {
     uint32_t queue_family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, nullptr);
     std::vector<VkQueueFamilyProperties> queue_families(queue_family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queue_family_count, queue_families.data());
+
+    if (!device_extension_support(device))
+    {
+        return -1;
+    }
+
+    if (get_surface_formats(device, surface->get_vk_surface_khr()).empty() ||
+        get_surface_present_modes(device, surface->get_vk_surface_khr()).empty())
+    {
+        return -1;
+    }
 
     int i = 0;
     for (const auto &queue_family : queue_families)
@@ -56,7 +138,7 @@ int device_match_request(VkPhysicalDevice device, const shared_ptr<Surface> surf
     return -1;
 }
 
-PhysicalDevice::PhysicalDevice(shared_ptr<Instance> instance, shared_ptr<Surface> surface) : instance(instance)
+PhysicalDevice::PhysicalDevice(shared_ptr<Instance> instance, shared_ptr<Surface> surface) : instance(instance), surface(surface)
 {
     uint32_t device_count;
     vkEnumeratePhysicalDevices(instance->get_vk_instance(), &device_count, nullptr);
@@ -85,4 +167,57 @@ PhysicalDevice::PhysicalDevice(shared_ptr<Instance> instance, shared_ptr<Surface
     {
         throw std::runtime_error("failed to find a suitable GPU!");
     }
+}
+
+VkSurfaceCapabilitiesKHR PhysicalDevice::surface_cap()
+{
+    return get_surface_cap(handle, surface->get_vk_surface_khr());
+}
+
+std::vector<VkSurfaceFormatKHR> PhysicalDevice::surface_formats()
+{
+    return get_surface_formats(handle, surface->get_vk_surface_khr());
+}
+
+std::vector<VkPresentModeKHR> PhysicalDevice::surface_present_modes()
+{
+    return get_surface_present_modes(handle, surface->get_vk_surface_khr());
+}
+
+LogicalDevice::LogicalDevice(shared_ptr<PhysicalDevice> physical_device) : physical(physical_device)
+{
+    VkDeviceQueueCreateInfo queue_create_info{};
+    queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_create_info.queueFamilyIndex = physical_device->get_queue_family_index();
+    queue_create_info.queueCount = 1;
+    float queue_priority = 1.0f;
+    queue_create_info.pQueuePriorities = &queue_priority;
+
+    VkPhysicalDeviceFeatures device_features{};
+
+    VkDeviceCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    create_info.pQueueCreateInfos = &queue_create_info;
+    create_info.queueCreateInfoCount = 1;
+    create_info.pEnabledFeatures = &device_features;
+
+    create_info.enabledExtensionCount = static_cast<uint32_t>(DEVICE_EXTENSIONS.size());
+    create_info.ppEnabledExtensionNames = DEVICE_EXTENSIONS.data();
+
+    if (ENABLE_VALIDATION_LAYERS)
+    {
+        create_info.enabledLayerCount = static_cast<uint32_t>(VALIDATION_LAYERS.size());
+        create_info.ppEnabledLayerNames = VALIDATION_LAYERS.data();
+    }
+    else
+    {
+        create_info.enabledLayerCount = 0;
+    }
+
+    if (vkCreateDevice(physical_device->get_vk_physical_device(), &create_info, nullptr, &handle) != VK_SUCCESS)
+    {
+        throw std::runtime_error("failed to create logical device!");
+    }
+
+    vkGetDeviceQueue(handle, physical_device->get_queue_family_index(), 0, &queue);
 }

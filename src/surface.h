@@ -5,12 +5,10 @@
 #include "window.h"
 #include "instance.h"
 
-using std::shared_ptr;
-
 class Surface
 {
 public:
-    Surface(const shared_ptr<Instance> instance, const shared_ptr<Window> window) : instance(instance), window(window)
+    Surface(const std::shared_ptr<Instance> instance, const std::shared_ptr<Window> window) : instance(instance), window(window)
     {
         if (glfwCreateWindowSurface(instance->get_vk_instance(), window->get_glfw_window(), nullptr, &handle) != VK_SUCCESS)
         {
@@ -36,6 +34,6 @@ public:
 
 private:
     VkSurfaceKHR handle;
-    shared_ptr<Instance> instance;
-    shared_ptr<Window> window;
+    std::shared_ptr<Instance> instance;
+    std::shared_ptr<Window> window;
 };
