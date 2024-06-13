@@ -3,6 +3,10 @@
 
 #include "window.h"
 #include "instance.h"
+#include "surface.h"
+#include "device_queue.h"
+
+using std::shared_ptr;
 
 class HelloTriangleApplication
 {
@@ -14,15 +18,24 @@ public:
         cleanup();
     }
 
+    HelloTriangleApplication() : window(std::make_shared<Window>("Hello Triangle")),
+                                 instance(std::make_shared<Instance>()),
+                                 surface(std::make_shared<Surface>(instance, window))
+    {
+        physical_device = std::make_shared<PhysicalDevice>(instance, surface);
+    }
+
 private:
-    Window window;
-    Instance instance;
+    shared_ptr<Window> window;
+    shared_ptr<Instance> instance;
+    shared_ptr<Surface> surface;
+    shared_ptr<PhysicalDevice> physical_device;
 
     void mainLoop()
     {
-        while (!window.should_close())
+        while (!window->should_close())
         {
-            window.poll_event();
+            window->poll_event();
         }
     }
 

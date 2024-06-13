@@ -1,10 +1,9 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 #include <cstdlib>
 #include <string>
+
+#include "glfw_vulkan.h"
 
 class Window
 {
@@ -18,7 +17,7 @@ public:
 
         handle = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
     };
-    Window() : Window(800, 600, false) {}
+    Window(const std::string &name = "Vulkan Example") : Window(800, 600, false, name) {}
 
     Window(const Window &) = delete;
     Window &operator=(const Window &) = delete;
@@ -28,15 +27,21 @@ public:
     ~Window()
     {
         glfwDestroyWindow(handle);
+        handle = nullptr;
         glfwTerminate();
     }
 
-    bool should_close()
+    GLFWwindow *get_glfw_window() const
+    {
+        return handle;
+    }
+
+    bool should_close() const
     {
         return glfwWindowShouldClose(handle);
     }
 
-    void poll_event()
+    void poll_event() const
     {
         glfwPollEvents();
     }

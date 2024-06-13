@@ -79,11 +79,11 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
     return VK_FALSE;
 }
 
-Instance::Instance(const string &app_name)
+Instance::Instance(const char *app_name)
 {
     VkApplicationInfo app_info{};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    app_info.pApplicationName = app_name.c_str();
+    app_info.pApplicationName = app_name;
     app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     app_info.pEngineName = "No Engine";
     app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -171,4 +171,5 @@ Instance::~Instance()
     }
 
     vkDestroyInstance(handle, nullptr);
+    handle = VK_NULL_HANDLE;
 }
