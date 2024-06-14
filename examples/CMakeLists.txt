@@ -4,3 +4,6 @@ target_link_libraries(create_window Vulkan::Vulkan glfw)
 
 add_executable(single_triangle single_triangle.cpp)
 target_link_libraries(single_triangle render_system)
+
+add_executable(shader_jit_compile shader_jit_compile/main.cpp)
+target_link_libraries(shader_jit_compile render_system)
