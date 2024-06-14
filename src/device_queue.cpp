@@ -169,17 +169,17 @@ PhysicalDevice::PhysicalDevice(shared_ptr<Instance> instance, shared_ptr<Surface
     }
 }
 
-VkSurfaceCapabilitiesKHR PhysicalDevice::surface_cap()
+VkSurfaceCapabilitiesKHR PhysicalDevice::surface_cap() const
 {
     return get_surface_cap(handle, surface->get_vk_surface_khr());
 }
 
-std::vector<VkSurfaceFormatKHR> PhysicalDevice::surface_formats()
+std::vector<VkSurfaceFormatKHR> PhysicalDevice::surface_formats() const
 {
     return get_surface_formats(handle, surface->get_vk_surface_khr());
 }
 
-std::vector<VkPresentModeKHR> PhysicalDevice::surface_present_modes()
+std::vector<VkPresentModeKHR> PhysicalDevice::surface_present_modes() const
 {
     return get_surface_present_modes(handle, surface->get_vk_surface_khr());
 }

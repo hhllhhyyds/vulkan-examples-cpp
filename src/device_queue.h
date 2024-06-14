@@ -1,3 +1,5 @@
+#pragma once
+
 #include <memory>
 #include <cstdlib>
 #include <vector>
@@ -23,19 +25,19 @@ public:
         handle = VK_NULL_HANDLE;
     }
 
-    VkPhysicalDevice get_vk_physical_device()
+    VkPhysicalDevice get_vk_physical_device() const
     {
         return handle;
     }
 
-    uint32_t get_queue_family_index()
+    uint32_t get_queue_family_index() const
     {
         return queue_family_index;
     }
 
-    VkSurfaceCapabilitiesKHR surface_cap();
-    std::vector<VkSurfaceFormatKHR> surface_formats();
-    std::vector<VkPresentModeKHR> surface_present_modes();
+    VkSurfaceCapabilitiesKHR surface_cap() const;
+    std::vector<VkSurfaceFormatKHR> surface_formats() const;
+    std::vector<VkPresentModeKHR> surface_present_modes() const;
 
 private:
     VkPhysicalDevice handle;
@@ -61,14 +63,19 @@ public:
         queue = VK_NULL_HANDLE;
     }
 
-    VkDevice get_vk_device()
+    VkDevice get_vk_device() const
     {
         return handle;
     }
 
-    VkQueue get_vk_queue()
+    VkQueue get_vk_queue() const
     {
         return queue;
+    }
+
+    shared_ptr<PhysicalDevice> get_physical() const
+    {
+        return physical;
     }
 
 private:

@@ -26,6 +26,11 @@ public:
         return handle;
     }
 
+    std::shared_ptr<Window> get_window() const
+    {
+        return window;
+    }
+
     ~Surface()
     {
         vkDestroySurfaceKHR(instance->get_vk_instance(), handle, nullptr);

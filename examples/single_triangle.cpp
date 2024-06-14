@@ -5,6 +5,7 @@
 #include "instance.h"
 #include "surface.h"
 #include "device_queue.h"
+#include "swapchain.h"
 
 using std::shared_ptr;
 
@@ -24,6 +25,7 @@ public:
     {
         physical_device = std::make_shared<PhysicalDevice>(instance, surface);
         device = std::make_shared<LogicalDevice>(physical_device);
+        swapchain = std::make_shared<Swapchain>(surface, device);
     }
 
 private:
@@ -32,6 +34,7 @@ private:
     shared_ptr<Surface> surface;
     shared_ptr<PhysicalDevice> physical_device;
     shared_ptr<LogicalDevice> device;
+    shared_ptr<Swapchain> swapchain;
 
     void mainLoop()
     {

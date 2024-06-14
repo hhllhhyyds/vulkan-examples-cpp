@@ -17,7 +17,7 @@ public:
 
         handle = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
     };
-    Window(const std::string &name = "Vulkan Example") : Window(800, 600, false, name) {}
+    Window(const std::string &name = "Vulkan Example") : Window(800, 600, true, name) {}
 
     Window(const Window &) = delete;
     Window &operator=(const Window &) = delete;
