@@ -1,8 +1,13 @@
 #include "device_queue.h"
 
+#if __APPLE__
 const std::vector<const char *> DEVICE_EXTENSIONS = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     "VK_KHR_portability_subset"};
+#else
+const std::vector<const char *> DEVICE_EXTENSIONS = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+#endif
 
 int device_priority(VkPhysicalDevice device)
 {
